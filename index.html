@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Spelling Expedition — Story Words Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1E9D2;
+    --paper-deep:#E8DCB8;
+    --ink:#1F2A44;
+    --ink-soft:#4A5578;
+    --teal:#2F8F8A;
+    --teal-deep:#20635F;
+    --gold:#D9A73B;
+    --coral:#D9724F;
+    --green-ok:#3B7A57;
+    --card-bg:#FBF6E8;
+    --shadow: 0 4px 0 rgba(31,42,68,0.18);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(217,167,59,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(47,143,138,0.12), transparent 45%),
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  h1,h2,h3,.display{ font-family:'Baloo 2', sans-serif; }
+  button{ font-family:inherit; cursor:pointer; }
+  button:focus-visible, input:focus-visible, .day-btn:focus-visible{
+    outline:3px solid var(--teal-deep);
+    outline-offset:2px;
+  }
+
+  header{
+    max-width:960px;
+    margin:0 auto;
+    padding:28px 20px 10px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-weight:700;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    color:var(--teal-deep);
+  }
+  header h1{
+    font-size:clamp(1.7rem, 4vw, 2.5rem);
+    margin:6px 0 4px;
+    color:var(--ink);
+  }
+  header p.tag{
+    color:var(--ink-soft);
+    margin:0 0 6px;
+    font-size:1rem;
+  }
+  header p.pace{
+    color:var(--teal-deep);
+    font-weight:700;
+    margin:0 0 18px;
+    font-size:0.85rem;
+  }
+
+  .name-row{
+    display:flex; gap:8px; justify-content:center; align-items:center;
+    flex-wrap:wrap; margin-bottom:18px;
+  }
+  .name-row label{ font-weight:700; font-size:0.9rem; }
+  .name-row input{
+    border:2px solid var(--paper-deep);
+    background:var(--card-bg);
+    border-radius:10px;
+    padding:7px 12px;
+    font-size:0.95rem;
+    font-family:inherit;
+    color:var(--ink);
+    min-width:170px;
+  }
+
+  .progress-wrap{
+    max-width:520px;
+    margin:0 auto 22px;
+  }
+  .progress-label{
+    display:flex; justify-content:space-between;
+    font-size:0.82rem; font-weight:700; color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .progress-bar{
+    height:14px; background:var(--paper-deep); border-radius:999px;
+    overflow:hidden; border:2px solid var(--ink);
+  }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg, var(--teal), var(--gold));
+    width:0%; transition:width .5s ease;
+  }
+  @media (prefers-reduced-motion:reduce){ .progress-fill{transition:none;} }
+
+  #mapView{ max-width:960px; margin:0 auto; padding:10px 20px 60px; }
+
+  .category-summary{
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:22px;
+  }
+  .cat-pill{
+    display:flex; align-items:center; gap:7px;
+    background:var(--card-bg); border:2px solid var(--land-color);
+    border-radius:999px; padding:6px 12px 6px 8px;
+  }
+  .cat-pill .cat-icon{
+    width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--land-color) 25%, white); font-size:0.95rem; flex-shrink:0;
+  }
+  .cat-pill .cat-text{ font-size:0.76rem; font-weight:700; color:var(--ink); line-height:1.2; }
+  .cat-pill .cat-frac{ color:var(--land-color); }
+
+  .day-path-intro{ text-align:center; font-size:0.85rem; color:var(--ink-soft); margin-bottom:14px; }
+
+  .day-path{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+  }
+  .day-btn{
+    width:64px; height:64px; border-radius:14px; border:3px solid var(--land-color);
+    background:color-mix(in srgb, var(--land-color) 12%, var(--card-bg));
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2px; position:relative; transition:transform .15s ease;
+  }
+  .day-btn:hover{ transform:translateY(-2px); }
+  @media (prefers-reduced-motion:reduce){ .day-btn:hover{transform:none;} }
+  .day-btn .day-num{ font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.05rem; color:var(--ink); }
+  .day-btn .day-icon{ font-size:0.85rem; }
+  .day-btn.done{ background:var(--land-color); }
+  .day-btn.done .day-num, .day-btn.done .day-icon{ color:white; }
+  .day-btn .day-star{ position:absolute; top:-8px; right:-6px; font-size:0.85rem; }
+
+  #dayView{ max-width:760px; margin:0 auto; padding:10px 20px 80px; display:none; }
+  .back-btn{
+    background:none; border:2px solid var(--ink); border-radius:10px;
+    padding:7px 14px; font-weight:700; font-size:0.9rem; color:var(--ink);
+    margin-bottom:16px;
+  }
+  .back-btn:hover{ background:var(--paper-deep); }
+  .day-header{ text-align:center; margin-bottom:22px; }
+  .day-header .land-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--card-bg); border:2px solid var(--land-color);
+    color:var(--land-color); border-radius:999px; padding:4px 14px;
+    font-weight:700; font-size:0.8rem; margin-bottom:8px;
+  }
+  .day-header h2{ margin:4px 0 6px; font-size:1.5rem; }
+  .day-header p{ color:var(--ink-soft); margin:0; font-size:0.9rem; }
+
+  .strategy-strip{
+    display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
+    margin:16px 0 24px; font-size:0.78rem; font-weight:700; color:var(--ink-soft);
+  }
+  .strategy-strip span{
+    background:var(--card-bg); border:2px dashed var(--paper-deep);
+    border-radius:999px; padding:5px 12px;
+  }
+
+  .show-mastered-toggle{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:0.85rem; font-weight:700; color:var(--ink-soft);
+    margin-bottom:16px; cursor:pointer; user-select:none;
+  }
+  .show-mastered-toggle input{ width:16px; height:16px; accent-color:var(--teal); cursor:pointer; }
+
+  .day-empty-state{
+    text-align:center; background:var(--card-bg); border:3px dashed var(--green-ok);
+    border-radius:var(--radius); padding:36px 20px;
+  }
+  .day-empty-icon{ font-size:2.6rem; margin-bottom:8px; }
+  .day-empty-state p{ margin:4px 0; font-weight:700; color:var(--ink); }
+  .day-empty-state .day-empty-sub{ font-weight:400; font-size:0.85rem; color:var(--ink-soft); }
+  .checkpoint-link-row{ text-align:center; margin:16px 0; }
+  .checkpoint-btn-small{
+    display:inline-block; background:var(--card-bg); color:var(--teal-deep);
+    text-decoration:none; font-weight:700; font-size:0.85rem;
+    padding:9px 18px; border-radius:999px; border:2px solid var(--teal);
+  }
+  .checkpoint-btn-small:hover{ background:var(--teal); color:white; }
+
+  .word-list{ display:flex; flex-direction:column; gap:14px; }
+  .word-card{ transition: opacity .35s ease, transform .35s ease, max-height .35s ease, margin .35s ease, padding .35s ease; }
+  .word-card.removing{ opacity:0; transform:scale(0.96); max-height:0; margin:0; padding-top:0; padding-bottom:0; overflow:hidden; border-width:0; }
+  @media (prefers-reduced-motion:reduce){ .word-card{ transition:none; } }
+
+  .word-card{
+    background:var(--card-bg); border:3px solid var(--ink); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:16px 18px; position:relative;
+  }
+  .word-card.mastered{ border-color:var(--green-ok); }
+  .word-card.mastered::before{
+    content:"✓ learned"; position:absolute; top:-11px; right:14px;
+    background:var(--green-ok); color:white; font-size:0.68rem; font-weight:700;
+    padding:2px 9px; border-radius:999px; letter-spacing:0.03em;
+  }
+
+  .word-row1{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .word-display{ display:flex; align-items:center; gap:10px; }
+  .word-number{
+    width:26px; height:26px; border-radius:50%; background:var(--paper-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; font-weight:700; color:var(--ink-soft); flex-shrink:0;
+  }
+  .word-text{ font-size:1.2rem; font-weight:700; letter-spacing:0.01em; }
+
+  .icon-btn{
+    background:var(--paper); border:2px solid var(--ink); border-radius:10px;
+    width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+    font-size:1rem;
+  }
+  .icon-btn:hover{ background:var(--paper-deep); }
+
+  .btn-group{ display:flex; gap:6px; }
+
+  .practice-zone{ margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .practice-zone input[type=text]{
+    flex:1 1 160px; border:2px solid var(--paper-deep); border-radius:10px;
+    padding:9px 12px; font-size:1rem; font-family:inherit; background:white; color:var(--ink);
+  }
+  .check-btn{
+    background:var(--teal); color:white; border:none; border-radius:10px;
+    padding:9px 16px; font-weight:700; font-size:0.9rem;
+  }
+  .check-btn:hover{ background:var(--teal-deep); }
+
+  .feedback{ font-size:0.85rem; font-weight:700; margin-top:8px; min-height:1.1em; }
+  .feedback.ok{ color:var(--green-ok); }
+  .feedback.retry{ color:var(--coral); }
+
+  .cover-hint{
+    font-size:0.78rem; color:var(--ink-soft); margin-top:4px;
+  }
+
+  .day-nav{
+    display:flex; justify-content:space-between; margin-top:26px; gap:10px; flex-wrap:wrap;
+  }
+  .nav-btn{
+    background:var(--card-bg); border:2px solid var(--ink); border-radius:10px;
+    padding:9px 16px; font-weight:700; font-size:0.88rem;
+  }
+  .nav-btn:hover{ background:var(--paper-deep); }
+  .nav-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  footer{ text-align:center; padding:20px; font-size:0.78rem; color:var(--ink-soft); }
+  .reset-btn{
+    background:none; border:1px solid var(--ink-soft); color:var(--ink-soft);
+    border-radius:8px; padding:5px 12px; font-size:0.75rem; margin-top:6px;
+  }
+
+  @media (max-width:600px){
+    .word-text{ font-size:1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Story Words Edition</div>
+  <h1>🧭 The Spelling Expedition</h1>
+  <p class="tag">Five kinds of words every story needs: people &amp; things, actions, describing words, time, and connectors.</p>
+  <p class="pace">38 lesson days — comfortably inside a 15-week term (75 slots), with 37 spare for revision.</p>
+  <div class="name-row">
+    <label for="explorerName">Explorer's name:</label>
+    <input type="text" id="explorerName" placeholder="Type your name">
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="progressText">0 / 357 words learned</span><span id="progressPercent">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<main id="mapView"></main>
+
+<main id="dayView">
+  <button class="back-btn" id="backBtn">← Back to the map</button>
+  <div class="day-header">
+    <span class="land-tag" id="landTag"></span>
+    <h2 id="dayTitle"></h2>
+    <p id="dayBlurb"></p>
+  </div>
+  <div class="strategy-strip">
+    <span>👀 Look</span><span>🙈 Cover</span><span>✏️ Write</span><span>✅ Check</span>
+  </div>
+  <label class="show-mastered-toggle">
+    <input type="checkbox" id="showMasteredToggle">
+    Show words I've already learned
+  </label>
+  <div class="word-list" id="wordList"></div>
+  <div class="checkpoint-link-row">
+    <a class="checkpoint-btn-small" id="checkpointLink" href="#" target="_blank" rel="noopener">🎯 Take the Checkpoint for this day →</a>
+  </div>
+  <div class="day-empty-state" id="dayEmptyState" style="display:none;">
+    <div class="day-empty-icon">🎉</div>
+    <p>Every word in this day is mastered!</p>
+    <p class="day-empty-sub">Tick "Show words I've already learned" above to review them, or move on to the next day.</p>
+  </div>
+  <div class="day-nav">
+    <button class="nav-btn" id="prevDayBtn">← Previous day</button>
+    <button class="nav-btn" id="nextDayBtn">Next day →</button>
+  </div>
+</main>
+
+<footer>
+  Progress is saved automatically on this device.
+  <br><button class="reset-btn" id="resetBtn">Reset all progress</button>
+</footer>
+
+<script>
+/* ---------------- DATA ----------------
+   Organised by the grammatical role each word plays in a story, not by
+   spelling pattern: nouns, actions (verbs), describing words (adjectives),
+   time phrases, and conjunctions. */
+const LANDS = [
+  { name:"Noun Village", icon:"🏘️", color:"#3B7A57",
+    blurb:"People, places and things — the who and what of every story.",
+    days:[
+      ["mother","father","sister","brother","cousin","uncle","auntie","grandmother","grandfather","grandparents","friend","classmate","neighbour","teacher","student"],
+      ["manager","security guard","dancer","artist","worker","driver","firefighter","lifeguard","thief","chief","head","shoulder","elbow","ankle","finger"],
+      ["stomach","tongue","eyebrow","chest","throat","knee","wrist","thumb","happiness","sadness","kindness","darkness","illness","weakness","lunch"],
+      ["dinner","supper","snack","dessert","cereal","sandwich","noodles","porridge","biscuit","chocolate","vegetable","pancake","popcorn","pencil","eraser"],
+      ["ruler","textbook","canteen","uniform","library","homework","notebook","playground","classroom","backpack","headache","keyboard","cupboard","toolbox","newspaper"],
+      ["television","telephone","computer","mirror","blanket","pillow","curtain","wardrobe","wallet","comb","whistle","scissors","muscle","scene","island"],
+      ["castle","restaurant","environment","field","staircase","bedroom","rainbow","sunshine","thunder","lightning","umbrella","flower","email","teddy bear","pair"],
+      ["birthday","sunflower","football","footprint","seashell","snowman","spaceship","waterfall","butterflies","earthquake","babies","ladies","puppies","families","countries"],
+      ["cities","parties","stories","buses","boxes","wishes","glasses","brushes","foxes","dishes","leaves","loaves","shelves","wolves","halves"],
+      ["knives","lives","thieves","children","mice","feet","teeth","men","women","sheep","photos","piano","YouTube videos","kangaroos","tomatoes"],
+      ["potatoes","everyone","park","competition","fried rice","chicken wings","cookies","bread","supermarket","police station","General Office","lost-and-found corner","principal","prefect","recess"],
+      ["bicycle","ice cream"],
+    ]
+  },
+  { name:"Verb Volcano", icon:"🌋", color:"#B25B3E",
+    blurb:"Action words — what characters do, feel and make happen.",
+    days:[
+      ["running","swimming","hopping","planning","stopping","shopping","sitting","getting","forgetting","beginning","winning","cutting","digging","jogging","hitting"],
+      ["struggling","dropped","clapped","chopped","gripped","skipped","tapped","trapped","slapped","shrugging","humming","jamming","slamming","spinning","grabbing"],
+      ["nodding","wagging","went","came","drank","thought","caught","taught","bought","brought","chose","disagree","disappear","dislike","disobey"],
+      ["discover","rewrite","refill","return","reuse","misplace","mistake","misread","misuse","misbehave","started","unlock","unpack","write","hear"],
+      ["know","meet","remembered","break","wear","listen","climb","knock","wrap","walk","talk","believe","achieve","receive","remember"],
+      ["followed","realised","participate","slept","waited","finished","rushed","shoved","smiled","stayed","cycled","celebrated"],
+    ]
+  },
+  { name:"Adjective Orchard", icon:"🍎", color:"#D9A73B",
+    blurb:"Describing words — what things look, feel and seem like.",
+    days:[
+      ["orange","yellow","green","purple","brown","black","white","pink","grey","blue","happy","angry","excited","nervous","proud"],
+      ["worried","surprised","scared","jealous","careful","careless","hopeful","hopeless","colourful","thoughtful","harmful","harmless","bigger","thinner","sadder"],
+      ["redder","wetter","hotter","fatter","flatter","sunny","rainy","cloudy","windy","stormy","beautiful","favourite","different","important","necessary"],
+      ["comfortable","opposite","brief","honest","whole","weak","bare","unhappy","unfair","unkind","unsafe","untidy","outdoor","grateful","crispy"],
+      ["delicious","perfect","asleep","hungry","frightened","guilty","amazing","warm"],
+    ]
+  },
+  { name:"Time Tunnel", icon:"⏳", color:"#6B4F8F",
+    blurb:"When it happened — days, moments and the phrases that carry a story forward.",
+    days:[
+      ["Tuesday","Thursday","Friday","Saturday","Wednesday","tomorrow","yesterday","morning","hour","week","February","suddenly","meanwhile","finally","afterwards"],
+      ["early morning","after a while","all of a sudden","in the end","the next day","later that night","before long","at that moment","without warning","just then","not long after"],
+    ]
+  },
+  { name:"Connector Bridge", icon:"🌉", color:"#2B6CA3",
+    blurb:"Joining words that link ideas and build longer, smoother sentences.",
+    days:[
+      ["because","when","while","before","after","until","although","though","since","unless","whenever","even though","as soon as","so that","in case"],
+    ]
+  },
+  { name:"Preposition Point", icon:"🧭", color:"#3D8B8B",
+    blurb:"Little words that show where or when something happens.",
+    days:[
+      ["under","forward","between","behind","beside","above","below","through","across","around","along","near","inside","outside","towards"],
+      ["against","among","beyond"],
+    ]
+  },
+  { name:"Adverb Avenue", icon:"🏃", color:"#D9724F",
+    blurb:"Words that describe how, when, or why something happens.",
+    days:[
+      ["accidentally","reluctantly","quickly","immediately","fortunately","gracefully","everywhere","almost"],
+    ]
+  },
+  { name:"Apostrophe Archipelago", icon:"🏝️", color:"#A0447A",
+    blurb:"Tiny islands, joined by one comma-shaped apostrophe.",
+    days:[
+      ["don't","can't","won't","isn't","aren't","wasn't","weren't","hasn't","didn't","doesn't","couldn't","shouldn't","wouldn't","I'm","you're"],
+      ["we're","they're","it's","that's","let's"],
+    ]
+  }
+];
+
+/* Interleave days round-robin across categories: Noun, Verb, Adjective, Time, Connector,
+   repeating until every land's days are used. This means every category gets touched
+   within the first few teaching days, instead of finishing all of Noun Village first. */
+const DAYS = [];
+const DAY_LAND_IDX = [];
+const DAY_LOCAL_INDEX = []; // which day-within-its-land this global day represents (0-based)
+{
+  const cursors = LANDS.map(()=>0);
+  let remaining = LANDS.reduce((n,l)=>n+l.days.length,0);
+  while(remaining > 0){
+    LANDS.forEach((land, li) => {
+      if(cursors[li] < land.days.length){
+        DAYS.push(land.days[cursors[li]]);
+        DAY_LAND_IDX.push(li);
+        DAY_LOCAL_INDEX.push(cursors[li]);
+        cursors[li]++;
+        remaining--;
+      }
+    });
+  }
+}
+/* Precompute, per land, the list of global day indices it appears at */
+const LAND_DAY_GLOBALS = LANDS.map((land, li) => {
+  const arr = [];
+  DAY_LAND_IDX.forEach((x, gi) => { if (x === li) arr.push(gi); });
+  return arr;
+});
+
+const TOTAL_WORDS = DAYS.reduce((n,d)=> n + d.length, 0);
+
+/* ---------------- STATE ---------------- */
+const STORAGE_KEY = "spellingExpeditionProgress_v4";
+const NAME_KEY = "spellingExpeditionName_v1";
+let progress = loadProgress();
+let currentDayIndex = null;
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  }catch(e){ return {}; }
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+function wordKey(dayIdx, wordIdx){ return dayIdx + "_" + wordIdx; }
+function isMastered(dayIdx, wordIdx){ return !!progress[wordKey(dayIdx, wordIdx)]; }
+function setMastered(dayIdx, wordIdx){ progress[wordKey(dayIdx, wordIdx)] = true; saveProgress(); }
+
+function totalMastered(){ return Object.keys(progress).length; }
+function dayMasteredCount(dayIdx){
+  return DAYS[dayIdx].reduce((n,_,i)=> n + (isMastered(dayIdx,i)?1:0), 0);
+}
+function landMasteredCount(landIdx){
+  return LAND_DAY_GLOBALS[landIdx].reduce((n,d)=> n + dayMasteredCount(d), 0);
+}
+function landWordCount(landIdx){
+  return LANDS[landIdx].days.reduce((n,d)=> n + d.length, 0);
+}
+
+/* ---------------- SPEECH ---------------- */
+function speak(text, rate){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = rate || 0.9;
+  window.speechSynthesis.speak(u);
+}
+function speakSpelledOut(word){
+  const letters = word.replace(/'/g,"").replace(/\s+/g,", ").split("").filter(c=>c.trim().length || c===',').join("");
+  // Build a clean letter-by-letter reading, treating spaces as short pauses
+  const parts = word.split(" ").map(w => w.split("").join(", "));
+  speak(parts.join(" ... "), 0.65);
+}
+
+/* ---------------- RENDER: HEADER ---------------- */
+function renderProgressBar(){
+  const done = totalMastered();
+  const pct = Math.round((done/TOTAL_WORDS)*100);
+  document.getElementById('progressFill').style.width = pct + "%";
+  document.getElementById('progressText').textContent = done + " / " + TOTAL_WORDS + " words learned";
+  document.getElementById('progressPercent').textContent = pct + "%";
+}
+
+/* ---------------- RENDER: MAP ---------------- */
+function renderMap(){
+  const mapView = document.getElementById('mapView');
+  mapView.innerHTML = "";
+
+  // Category summary strip
+  const summary = document.createElement('div');
+  summary.className = 'category-summary';
+  LANDS.forEach((land, li) => {
+    const mastered = landMasteredCount(li);
+    const wordCount = landWordCount(li);
+    const pill = document.createElement('div');
+    pill.className = 'cat-pill';
+    pill.style.setProperty('--land-color', land.color);
+    pill.innerHTML = `<span class="cat-icon">${land.icon}</span><span class="cat-text">${land.name}<br><span class="cat-frac">${mastered}/${wordCount}</span></span>`;
+    summary.appendChild(pill);
+  });
+  mapView.appendChild(summary);
+
+  const intro = document.createElement('p');
+  intro.className = 'day-path-intro';
+  intro.textContent = "Teaching days run in order — each day mixes categories, so no one type of word waits weeks to be taught.";
+  mapView.appendChild(intro);
+
+  // Day Path: one button per teaching day, coloured by its category
+  const path = document.createElement('div');
+  path.className = 'day-path';
+  for(let d=0; d<DAYS.length; d++){
+    const land = LANDS[DAY_LAND_IDX[d]];
+    const complete = dayMasteredCount(d) === DAYS[d].length;
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (complete ? ' done' : '');
+    btn.style.setProperty('--land-color', land.color);
+    btn.setAttribute('aria-label', "Day " + (d+1) + ", " + land.name + (complete ? ", complete" : ""));
+    btn.innerHTML = `
+      ${complete ? '<span class="day-star">⭐</span>' : ''}
+      <span class="day-icon">${land.icon}</span>
+      <span class="day-num">${d+1}</span>
+    `;
+    btn.addEventListener('click', ()=> openDay(d));
+    path.appendChild(btn);
+  }
+  mapView.appendChild(path);
+}
+
+/* ---------------- RENDER: DAY ---------------- */
+function openDay(dayIdx){
+  currentDayIndex = dayIdx;
+  document.getElementById('mapView').style.display = 'none';
+  document.getElementById('dayView').style.display = 'block';
+  renderDay();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function backToMap(){
+  document.getElementById('dayView').style.display = 'none';
+  document.getElementById('mapView').style.display = 'block';
+  renderMap();
+  renderProgressBar();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderDay(){
+  const dayIdx = currentDayIndex;
+  const landIdx = DAY_LAND_IDX[dayIdx];
+  const land = LANDS[landIdx];
+  const words = DAYS[dayIdx];
+  const dayInLand = DAY_LOCAL_INDEX[dayIdx] + 1;
+
+  document.documentElement.style.setProperty('--land-color', land.color);
+  document.getElementById('landTag').innerHTML = `${land.icon} ${land.name}`;
+  document.getElementById('landTag').style.color = land.color;
+  document.getElementById('landTag').style.borderColor = land.color;
+  document.getElementById('dayTitle').textContent = "Day " + (dayIdx+1) + " of " + DAYS.length + " · " + land.name + " (day " + dayInLand + " of " + land.days.length + ")";
+  document.getElementById('dayBlurb').textContent = land.blurb;
+
+  const showMastered = document.getElementById('showMasteredToggle').checked;
+  const list = document.getElementById('wordList');
+  const emptyState = document.getElementById('dayEmptyState');
+  list.innerHTML = "";
+
+  let anyRendered = false;
+
+  words.forEach((word, wi)=>{
+    const mastered = isMastered(dayIdx, wi);
+    if(mastered && !showMastered) return; // cleared words stay hidden by default
+    anyRendered = true;
+
+    const card = document.createElement('div');
+    card.className = 'word-card' + (mastered ? ' mastered' : '');
+    card.style.setProperty('--land-color', land.color);
+    card.dataset.wi = wi;
+
+    card.innerHTML = `
+      <div class="word-row1">
+        <div class="word-display">
+          <span class="word-number">${wi+1}</span>
+          <span class="word-text" id="wt-${wi}">${word}</span>
+        </div>
+        <div class="btn-group">
+          <button class="icon-btn" title="Hear the word" aria-label="Hear ${word}" data-action="speak">🔊</button>
+          <button class="icon-btn" title="Hear it spelled out" aria-label="Hear ${word} spelled out letter by letter" data-action="spell">🔤</button>
+          <button class="icon-btn" title="Cover the word and write it" aria-label="Cover the word" data-action="cover">🙈</button>
+        </div>
+      </div>
+      <div class="cover-hint" id="hint-${wi}"></div>
+      <div class="practice-zone" id="zone-${wi}" style="display:none;">
+        <input type="text" id="input-${wi}" placeholder="Write it from memory..." autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" data-action="check">Check</button>
+      </div>
+      <div class="feedback" id="feedback-${wi}"></div>
+    `;
+    list.appendChild(card);
+
+    card.querySelector('[data-action="speak"]').addEventListener('click', ()=> speak(word));
+    card.querySelector('[data-action="spell"]').addEventListener('click', ()=> speakSpelledOut(word));
+    card.querySelector('[data-action="cover"]').addEventListener('click', ()=> coverWord(dayIdx, wi));
+    card.querySelector('[data-action="check"]').addEventListener('click', ()=> checkWord(dayIdx, wi));
+    const inputEl = card.querySelector('#input-'+wi);
+    inputEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ checkWord(dayIdx, wi); } });
+  });
+
+  list.style.display = anyRendered ? 'flex' : 'none';
+  emptyState.style.display = anyRendered ? 'none' : 'block';
+  document.getElementById('checkpointLink').href = 'spelling-checkpoint-afl.html?day=' + (dayIdx + 1);
+
+  document.getElementById('prevDayBtn').disabled = dayIdx === 0;
+  document.getElementById('nextDayBtn').disabled = dayIdx === DAYS.length - 1;
+  document.getElementById('prevDayBtn').onclick = ()=> openDay(dayIdx-1);
+  document.getElementById('nextDayBtn').onclick = ()=> openDay(dayIdx+1);
+}
+
+document.getElementById('showMasteredToggle').addEventListener('change', renderDay);
+
+function coverWord(dayIdx, wi){
+  const word = DAYS[dayIdx][wi];
+  const wt = document.getElementById('wt-'+wi);
+  const hint = document.getElementById('hint-'+wi);
+  const zone = document.getElementById('zone-'+wi);
+  wt.textContent = word.split(" ").map(w => '• '.repeat(w.length).trim()).join(" ");
+  hint.textContent = "Now write it from memory below, then press Check.";
+  zone.style.display = 'flex';
+  document.getElementById('input-'+wi).focus();
+}
+
+function checkWord(dayIdx, wi){
+  const word = DAYS[dayIdx][wi];
+  const input = document.getElementById('input-'+wi);
+  const feedback = document.getElementById('feedback-'+wi);
+  const guess = input.value.trim();
+  const clean = s => s.trim().toLowerCase().replace(/\s+/g," ");
+
+  if(clean(guess) === clean(word)){
+    feedback.className = 'feedback ok';
+    feedback.textContent = "🎉 Correct! Well spelled.";
+    setMastered(dayIdx, wi);
+    document.getElementById('wt-'+wi).textContent = word;
+    renderProgressBar();
+
+    const card = input.closest('.word-card');
+    const showMastered = document.getElementById('showMasteredToggle').checked;
+    if(showMastered){
+      card.classList.add('mastered');
+    } else {
+      // let the student see the success message briefly, then the word disappears
+      setTimeout(()=>{
+        card.classList.add('removing');
+        card.addEventListener('transitionend', ()=>{
+          card.remove();
+          const list = document.getElementById('wordList');
+          const stillVisible = list.querySelectorAll('.word-card').length > 0;
+          list.style.display = stillVisible ? 'flex' : 'none';
+          document.getElementById('dayEmptyState').style.display = stillVisible ? 'none' : 'block';
+        }, { once:true });
+      }, 900);
+    }
+  } else if(guess.length === 0){
+    feedback.className = 'feedback retry';
+    feedback.textContent = "Type your best guess first, then press Check.";
+  } else {
+    feedback.className = 'feedback retry';
+    feedback.textContent = "Not quite — look at it again, cover it, and try once more.";
+  }
+}
+
+/* ---------------- INIT ---------------- */
+document.getElementById('backBtn').addEventListener('click', backToMap);
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm("This will clear all learned words on this device. Continue?")){
+    progress = {};
+    saveProgress();
+    renderMap();
+    renderProgressBar();
+  }
+});
+
+const nameInput = document.getElementById('explorerName');
+nameInput.value = localStorage.getItem(NAME_KEY) || "";
+nameInput.addEventListener('input', ()=> localStorage.setItem(NAME_KEY, nameInput.value));
+
+renderMap();
+renderProgressBar();
+</script>
+</body>
+</html>
