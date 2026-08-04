@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spelling Checkpoint — Cumulative AfL Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1E9D2;
+    --paper-deep:#E8DCB8;
+    --ink:#1F2A44;
+    --ink-soft:#4A5578;
+    --teal:#2F8F8A;
+    --teal-deep:#20635F;
+    --gold:#D9A73B;
+    --coral:#D9724F;
+    --green-ok:#3B7A57;
+    --card-bg:#FBF6E8;
+    --shadow: 0 4px 0 rgba(31,42,68,0.18);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(217,167,59,0.10), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(47,143,138,0.12), transparent 45%),
+      var(--paper);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Atkinson Hyperlegible', sans-serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  h1,h2,h3{ font-family:'Baloo 2', sans-serif; }
+  button{ font-family:inherit; cursor:pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:3px solid var(--teal-deep);
+    outline-offset:2px;
+  }
+
+  header{ max-width:720px; margin:0 auto; padding:28px 20px 10px; text-align:center; }
+  .eyebrow{ font-weight:700; letter-spacing:0.14em; text-transform:uppercase; font-size:0.72rem; color:var(--teal-deep); }
+  header h1{ font-size:clamp(1.6rem, 4vw, 2.3rem); margin:6px 0 4px; }
+  header p.tag{ color:var(--ink-soft); margin:0 0 18px; font-size:0.95rem; }
+
+  main{ max-width:640px; margin:0 auto; padding:0 20px 60px; }
+
+  .setup-card{
+    background:var(--card-bg); border:3px solid var(--ink); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:24px; text-align:center;
+  }
+  .setup-card label{ display:block; font-weight:700; margin-bottom:8px; }
+  .setup-row{ display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:18px; }
+  select, input[type=number]{
+    border:2px solid var(--paper-deep); border-radius:10px; padding:9px 14px;
+    font-size:1rem; font-family:inherit; background:white; color:var(--ink);
+  }
+  .big-btn{
+    background:var(--teal); color:white; border:none; border-radius:12px;
+    padding:13px 28px; font-weight:700; font-size:1.05rem; box-shadow:var(--shadow);
+  }
+  .big-btn:hover{ background:var(--teal-deep); }
+  .setup-note{ font-size:0.82rem; color:var(--ink-soft); margin-top:14px; }
+  .land-legend{ font-size:0.78rem; color:var(--ink-soft); margin-top:16px; text-align:left; }
+  .land-legend div{ margin-bottom:3px; }
+
+  .setup-card label{ text-align:left; }
+  .gear-btn{
+    background:var(--paper); border:2px solid var(--ink); border-radius:10px;
+    width:44px; height:44px; font-size:1.1rem;
+  }
+  .gear-btn:hover{ background:var(--paper-deep); }
+  textarea, .setup-card input[type=text]{
+    width:100%; border:2px solid var(--paper-deep); border-radius:10px; padding:10px 12px;
+    font-size:0.95rem; font-family:inherit; background:white; color:var(--ink); resize:vertical;
+  }
+  #studentPicker{ flex:1; }
+
+  .quiz-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:8px; }
+  .quiz-progress{ font-weight:700; color:var(--ink-soft); font-size:0.9rem; }
+  .quit-btn{
+    background:none; border:2px solid var(--ink); border-radius:10px; padding:6px 14px;
+    font-weight:700; font-size:0.82rem; color:var(--ink);
+  }
+  .quit-btn:hover{ background:var(--paper-deep); }
+
+  .score-track{ display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; }
+  .score-dot{
+    width:16px; height:16px; border-radius:50%; border:2px solid var(--ink); background:var(--paper-deep);
+  }
+  .score-dot.correct{ background:var(--green-ok); border-color:var(--green-ok); }
+  .score-dot.wrong{ background:var(--coral); border-color:var(--coral); }
+
+  .q-card{
+    background:var(--card-bg); border:3px solid var(--ink); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:26px 24px; text-align:center;
+  }
+  .q-type-tag{
+    display:inline-block; font-size:0.72rem; font-weight:700; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--teal-deep); background:var(--paper);
+    border-radius:999px; padding:3px 12px; margin-bottom:14px;
+  }
+  .q-emoji{ font-size:4.5rem; margin:10px 0 18px; line-height:1; }
+  .q-color-swatch{
+    width:110px; height:110px; border-radius:16px; border:3px solid var(--ink);
+    margin:10px auto 18px;
+  }
+  .q-number{
+    font-size:3.4rem; font-weight:800; font-family:'Baloo 2',sans-serif; color:var(--ink);
+    margin:10px 0 18px;
+  }
+  .q-sentence{
+    font-size:1.25rem; font-weight:700; color:var(--ink); margin:10px 0 6px; line-height:1.5;
+  }
+  .q-sentence-hint{ font-size:0.8rem; color:var(--ink-soft); margin-bottom:18px; }
+  .speak-btn{
+    background:var(--paper); border:2px solid var(--ink); border-radius:10px;
+    width:44px; height:44px; font-size:1.2rem; margin-bottom:14px;
+  }
+  .speak-btn:hover{ background:var(--paper-deep); }
+
+  .answer-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:6px; }
+  .answer-row input[type=text]{
+    flex:1 1 220px; max-width:320px; border:2px solid var(--paper-deep); border-radius:10px;
+    padding:12px 14px; font-size:1.1rem; font-family:inherit; text-align:center;
+  }
+  .submit-btn{
+    background:var(--teal); color:white; border:none; border-radius:10px;
+    padding:12px 22px; font-weight:700; font-size:1rem;
+  }
+  .submit-btn:hover{ background:var(--teal-deep); }
+
+  .feedback-banner{
+    margin-top:18px; border-radius:12px; padding:14px; font-weight:700; display:none;
+  }
+  .feedback-banner.correct{ background:#DCEEE1; color:var(--green-ok); display:block; border:2px solid var(--green-ok); }
+  .feedback-banner.wrong{ background:#FBE2DA; color:var(--coral); display:block; border:2px solid var(--coral); }
+
+  .next-btn{
+    margin-top:16px; background:var(--gold); color:white; border:none; border-radius:10px;
+    padding:11px 24px; font-weight:700; font-size:1rem; display:none;
+  }
+  .next-btn.show{ display:inline-block; }
+  .next-btn:hover{ filter:brightness(0.93); }
+
+  .results-card{
+    background:var(--card-bg); border:3px solid var(--ink); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:30px 24px; text-align:center;
+  }
+  .results-score{ font-size:3rem; font-weight:800; font-family:'Baloo 2',sans-serif; color:var(--teal-deep); margin:6px 0; }
+  .results-list{ text-align:left; margin:20px 0; max-height:320px; overflow-y:auto; }
+  .results-item{
+    display:flex; justify-content:space-between; gap:10px; padding:8px 10px; border-bottom:1px solid var(--paper-deep);
+    font-size:0.9rem;
+  }
+  .results-item.wrong .r-word{ color:var(--coral); font-weight:700; }
+  .results-item.correct .r-word{ color:var(--green-ok); font-weight:700; }
+  .results-btns{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+
+  footer{ text-align:center; padding:20px; font-size:0.78rem; color:var(--ink-soft); }
+
+  @media (max-width:500px){
+    .q-emoji{ font-size:3.5rem; }
+    .q-sentence{ font-size:1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Assessment for Learning</div>
+  <h1>🎯 Spelling Checkpoint</h1>
+  <p class="tag">A cumulative, randomised spelling test matched to the Spelling Expedition word list.</p>
+</header>
+
+<main>
+  <div id="setupView">
+    <div class="setup-card">
+      <label for="studentPicker">Who's taking the checkpoint?</label>
+      <div class="setup-row">
+        <select id="studentPicker"></select>
+        <button class="gear-btn" id="openSettingsBtn" title="Manage class list & settings" aria-label="Manage class list and settings">⚙️</button>
+      </div>
+      <label for="classInput" style="margin-top:6px;">Class</label>
+      <div class="setup-row">
+        <input type="text" id="classInput" placeholder="e.g. P4 Faith" style="max-width:220px;">
+      </div>
+      <label for="dayPicker" style="margin-top:6px;">Which teaching day have you reached?</label>
+      <div class="setup-row">
+        <select id="dayPicker"></select>
+        <button class="big-btn" id="startBtn">Start Checkpoint</button>
+      </div>
+      <p class="setup-note" id="setupInfo"></p>
+      <p class="setup-note" id="submitStatus"></p>
+      <div class="land-legend" id="landLegend"></div>
+    </div>
+  </div>
+
+  <div id="settingsView" style="display:none;">
+    <div class="setup-card">
+      <h2 style="margin-top:0;">Settings</h2>
+      <label for="rosterInput">Class list (one student name per line)</label>
+      <textarea id="rosterInput" rows="10" placeholder="Faris&#10;Nailah&#10;Vera&#10;Cahaya&#10;Ritz&#10;Jaden&#10;Kai Lin&#10;Ilyas&#10;Mikail&#10;Chen Xi&#10;Caylen"></textarea>
+      <label for="scriptUrlInput" style="margin-top:14px;">Google Apps Script Web App URL (for saving scores)</label>
+      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+      <p class="setup-note">This is already set up for Michelle's class Sheet. Only change it if you're using a different Sheet.</p>
+      <div class="results-btns" style="margin-top:16px;">
+        <button class="big-btn" id="saveSettingsBtn">Save settings</button>
+        <button class="quit-btn" id="closeSettingsBtn">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quizView" style="display:none;">
+    <div class="quiz-header">
+      <span class="quiz-progress" id="quizProgress"></span>
+      <button class="quit-btn" id="quitBtn">End checkpoint</button>
+    </div>
+    <div class="score-track" id="scoreTrack"></div>
+    <div class="q-card" id="qCard"></div>
+  </div>
+
+  <div id="resultsView" style="display:none;">
+    <div class="results-card">
+      <h2>Checkpoint complete!</h2>
+      <div class="results-score" id="resultsScore"></div>
+      <p id="resultsSub" style="color:var(--ink-soft); font-weight:700;"></p>
+      <p class="setup-note" id="resultsSubmitStatus"></p>
+      <div class="results-list" id="resultsList"></div>
+      <div class="results-btns">
+        <button class="big-btn" id="retryBtn">New random checkpoint</button>
+        <button class="quit-btn" id="changeeDayBtn">Choose a different day</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>Word list matches the Spelling Expedition learning tool exactly (357 words/phrases, 38 days, 5 lands). Scores are saved to your Google Sheet if configured in Settings.</footer>
+
+
+<script>
+/* ======================================================================
+   DATA — mirrors the Spelling Expedition learning tool exactly:
+   Noun Village, Verb Volcano, Adjective Orchard, Time Tunnel, Connector Bridge.
+
+   Question object shapes:
+     { w, type:"emoji",    emoji }                 -> show picture, spell the word
+     { w, type:"color",    hex }                    -> show colour swatch, spell the word
+     { w, type:"number",   digit }                   -> show digit, spell the number word
+     { w, type:"sentence", sentence }                -> sentence with word misspelt/wrong homophone; TTS reads it as shown
+     { w, type:"blank",    display, speak }          -> sentence with a blank; TTS reads the full correct sentence
+   Correct answer is always `w`.
+   ====================================================================== */
+const LANDS = [{"name":"Noun Village","icon":"🏘️","color":"#3B7A57","blurb":"People, places and things — the who and what of every story.","days":[[{"w":"mother","type":"emoji","emoji":"👩"},{"w":"father","type":"emoji","emoji":"👨"},{"w":"sister","type":"emoji","emoji":"👧"},{"w":"brother","type":"emoji","emoji":"👦"},{"w":"cousin","type":"sentence","sentence":"My kuzzin is visiting this weekend.","speak":"My cousin is visiting this weekend."},{"w":"uncle","type":"sentence","sentence":"My unkul took me fishing.","speak":"My uncle took me fishing."},{"w":"auntie","type":"sentence","sentence":"My anty baked cookies for us.","speak":"My auntie baked cookies for us."},{"w":"grandmother","type":"emoji","emoji":"👵"},{"w":"grandfather","type":"emoji","emoji":"👴"},{"w":"grandparents","type":"emoji","emoji":"👴👵"},{"w":"friend","type":"emoji","emoji":"🧑‍🤝‍🧑"},{"w":"classmate","type":"sentence","sentence":"My klasmait sits next to me.","speak":"My classmate sits next to me."},{"w":"neighbour","type":"sentence","sentence":"My naybur has a friendly dog.","speak":"My neighbour has a friendly dog."},{"w":"teacher","type":"emoji","emoji":"👩‍🏫"},{"w":"student","type":"emoji","emoji":"🧑‍🎓"}],[{"w":"manager","type":"emoji","emoji":"🧑‍💼"},{"w":"security guard","type":"emoji","emoji":"💂"},{"w":"dancer","type":"emoji","emoji":"💃"},{"w":"artist","type":"emoji","emoji":"🎨"},{"w":"worker","type":"emoji","emoji":"👷"},{"w":"driver","type":"emoji","emoji":"🚗"},{"w":"firefighter","type":"emoji","emoji":"🧑‍🚒"},{"w":"lifeguard","type":"sentence","sentence":"The lyfegard watched the swimmers carefully.","speak":"The lifeguard watched the swimmers carefully."},{"w":"thief","type":"sentence","sentence":"The theef ran away with the jewels.","speak":"The thief ran away with the jewels."},{"w":"chief","type":"sentence","sentence":"The cheef led the tribe bravely.","speak":"The chief led the tribe bravely."},{"w":"head","type":"sentence","sentence":"I hurt my hedd when I fell.","speak":"I hurt my head when I fell."},{"w":"shoulder","type":"sentence","sentence":"He hurt his sholdur playing rugby.","speak":"He hurt his shoulder playing rugby."},{"w":"elbow","type":"sentence","sentence":"She scraped her elboh on the ground.","speak":"She scraped her elbow on the ground."},{"w":"ankle","type":"sentence","sentence":"He twisted his ankul during the race.","speak":"He twisted his ankle during the race."},{"w":"finger","type":"emoji","emoji":"☝️"}],[{"w":"stomach","type":"sentence","sentence":"My stummick hurts after lunch.","speak":"My stomach hurts after lunch."},{"w":"tongue","type":"emoji","emoji":"👅"},{"w":"eyebrow","type":"sentence","sentence":"She raised her eyebrau in surprise.","speak":"She raised her eyebrow in surprise."},{"w":"chest","type":"sentence","sentence":"He felt a pain in his cheast.","speak":"He felt a pain in his chest."},{"w":"throat","type":"sentence","sentence":"I have a sore throwt.","speak":"I have a sore throat."},{"w":"knee","type":"sentence","sentence":"I hurt my nea when I fell down.","speak":"I hurt my knee when I fell down."},{"w":"wrist","type":"sentence","sentence":"I hurt my rihst playing football.","speak":"I hurt my wrist playing football."},{"w":"thumb","type":"sentence","sentence":"I hurt my thumm on the door.","speak":"I hurt my thumb on the door."},{"w":"happiness","type":"sentence","sentence":"Winning the game filled her with hapinuss.","speak":"Winning the game filled her with happiness."},{"w":"sadness","type":"sentence","sentence":"He felt a wave of sadnuss.","speak":"He felt a wave of sadness."},{"w":"kindness","type":"sentence","sentence":"Thank you for your kindnuss.","speak":"Thank you for your kindness."},{"w":"darkness","type":"sentence","sentence":"The room was filled with darknuss.","speak":"The room was filled with darkness."},{"w":"illness","type":"sentence","sentence":"She missed school due to ilnuss.","speak":"She missed school due to illness."},{"w":"weakness","type":"sentence","sentence":"Everyone has a weeknuss.","speak":"Everyone has a weakness."},{"w":"lunch","type":"emoji","emoji":"🍱"}],[{"w":"dinner","type":"emoji","emoji":"🍽️"},{"w":"supper","type":"sentence","sentence":"We had soup for suppa.","speak":"We had soup for supper."},{"w":"snack","type":"emoji","emoji":"🍟"},{"w":"dessert","type":"emoji","emoji":"🍰"},{"w":"cereal","type":"emoji","emoji":"🥣"},{"w":"sandwich","type":"emoji","emoji":"🥪"},{"w":"noodles","type":"emoji","emoji":"🍜"},{"w":"porridge","type":"sentence","sentence":"I ate porrij for breakfast.","speak":"I ate porridge for breakfast."},{"w":"biscuit","type":"emoji","emoji":"🍪"},{"w":"chocolate","type":"emoji","emoji":"🍫"},{"w":"vegetable","type":"emoji","emoji":"🥦"},{"w":"pancake","type":"emoji","emoji":"🥞"},{"w":"popcorn","type":"emoji","emoji":"🍿"},{"w":"pencil","type":"emoji","emoji":"✏️"},{"w":"eraser","type":"sentence","sentence":"May I borrow your erayzer?","speak":"May I borrow your eraser?"}],[{"w":"ruler","type":"emoji","emoji":"📏"},{"w":"textbook","type":"emoji","emoji":"📚"},{"w":"canteen","type":"sentence","sentence":"We ate lunch at the kanteen.","speak":"We ate lunch at the canteen."},{"w":"uniform","type":"sentence","sentence":"I wear my school yewniform every day.","speak":"I wear my school uniform every day."},{"w":"library","type":"sentence","sentence":"We borrowed books from the lieberry.","speak":"We borrowed books from the library."},{"w":"homework","type":"emoji","emoji":"📝"},{"w":"notebook","type":"emoji","emoji":"📓"},{"w":"playground","type":"emoji","emoji":"🛝"},{"w":"classroom","type":"emoji","emoji":"🏫"},{"w":"backpack","type":"emoji","emoji":"🎒"},{"w":"headache","type":"sentence","sentence":"He had a bad hedayk after the loud music.","speak":"He had a bad headache after the loud music."},{"w":"keyboard","type":"emoji","emoji":"⌨️"},{"w":"cupboard","type":"sentence","sentence":"Put the plates in the kubberd.","speak":"Put the plates in the cupboard."},{"w":"toolbox","type":"emoji","emoji":"🧰"},{"w":"newspaper","type":"emoji","emoji":"📰"}],[{"w":"television","type":"emoji","emoji":"📺"},{"w":"telephone","type":"emoji","emoji":"☎️"},{"w":"computer","type":"emoji","emoji":"💻"},{"w":"mirror","type":"emoji","emoji":"🪞"},{"w":"blanket","type":"sentence","sentence":"I wrapped myself in a warm blankit.","speak":"I wrapped myself in a warm blanket."},{"w":"pillow","type":"sentence","sentence":"I rested my head on the soft piloh.","speak":"I rested my head on the soft pillow."},{"w":"curtain","type":"sentence","sentence":"She closed the kurtin before bed.","speak":"She closed the curtain before bed."},{"w":"wardrobe","type":"sentence","sentence":"I hung my coat in the wordrohb.","speak":"I hung my coat in the wardrobe."},{"w":"wallet","type":"emoji","emoji":"👛"},{"w":"comb","type":"emoji","emoji":"🪮"},{"w":"whistle","type":"sentence","sentence":"The referee blew his wissul.","speak":"The referee blew his whistle."},{"w":"scissors","type":"emoji","emoji":"✂️"},{"w":"muscle","type":"emoji","emoji":"💪"},{"w":"scene","type":"sentence","sentence":"The first seen of the play was funny.","speak":"The first scene of the play was funny."},{"w":"island","type":"emoji","emoji":"🏝️"}],[{"w":"castle","type":"emoji","emoji":"🏰"},{"w":"restaurant","type":"emoji","emoji":"🍽️"},{"w":"environment","type":"sentence","sentence":"We must protect the envyerment.","speak":"We must protect the environment."},{"w":"field","type":"emoji","emoji":"🌾"},{"w":"staircase","type":"sentence","sentence":"He walked up the stairkays.","speak":"He walked up the staircase."},{"w":"bedroom","type":"emoji","emoji":"🛏️"},{"w":"rainbow","type":"emoji","emoji":"🌈"},{"w":"sunshine","type":"emoji","emoji":"☀️"},{"w":"thunder","type":"emoji","emoji":"🌩️"},{"w":"lightning","type":"emoji","emoji":"⚡"},{"w":"umbrella","type":"emoji","emoji":"☂️"},{"w":"flower","type":"sentence","sentence":"She picked a pretty flour.","speak":"She picked a pretty flower."},{"w":"email","type":"emoji","emoji":"📧"},{"w":"teddy bear","type":"emoji","emoji":"🧸"},{"w":"pair","type":"sentence","sentence":"I bought a new pear of shoes.","speak":"I bought a new pair of shoes."}],[{"w":"birthday","type":"emoji","emoji":"🎂"},{"w":"sunflower","type":"emoji","emoji":"🌻"},{"w":"football","type":"emoji","emoji":"⚽"},{"w":"footprint","type":"emoji","emoji":"👣"},{"w":"seashell","type":"emoji","emoji":"🐚"},{"w":"snowman","type":"emoji","emoji":"⛄"},{"w":"spaceship","type":"emoji","emoji":"🚀"},{"w":"waterfall","type":"sentence","sentence":"We saw a beautiful wawterfall in the forest.","speak":"We saw a beautiful waterfall in the forest."},{"w":"butterflies","type":"emoji","emoji":"🦋🦋"},{"w":"earthquake","type":"sentence","sentence":"The urthkwayk shook the whole city.","speak":"The earthquake shook the whole city."},{"w":"babies","type":"emoji","emoji":"👶👶"},{"w":"ladies","type":"sentence","sentence":"Two ladys walked into the shop.","speak":"Two ladies walked into the shop."},{"w":"puppies","type":"emoji","emoji":"🐶🐶"},{"w":"families","type":"emoji","emoji":"👪"},{"w":"countries","type":"sentence","sentence":"We learned about many countrys in class.","speak":"We learned about many countries in class."}],[{"w":"cities","type":"emoji","emoji":"🏙️🏙️"},{"w":"parties","type":"emoji","emoji":"🎉🎉"},{"w":"stories","type":"emoji","emoji":"📖📖"},{"w":"buses","type":"emoji","emoji":"🚌🚌"},{"w":"boxes","type":"emoji","emoji":"📦📦"},{"w":"wishes","type":"sentence","sentence":"I have two wishs for my birthday.","speak":"I have two wishes for my birthday."},{"w":"glasses","type":"emoji","emoji":"👓"},{"w":"brushes","type":"emoji","emoji":"🪥🪥"},{"w":"foxes","type":"emoji","emoji":"🦊🦊"},{"w":"dishes","type":"emoji","emoji":"🍽️🍽️"},{"w":"leaves","type":"emoji","emoji":"🍃🍃"},{"w":"loaves","type":"emoji","emoji":"🍞🍞"},{"w":"shelves","type":"sentence","sentence":"I put my books on the shelfs.","speak":"I put my books on the shelves."},{"w":"wolves","type":"emoji","emoji":"🐺🐺"},{"w":"halves","type":"sentence","sentence":"Cut the apple into two halfs.","speak":"Cut the apple into two halves."}],[{"w":"knives","type":"emoji","emoji":"🔪🔪"},{"w":"lives","type":"sentence","sentence":"Cats are said to have nine lifes.","speak":"Cats are said to have nine lives."},{"w":"thieves","type":"sentence","sentence":"The thiefs stole the jewels.","speak":"The thieves stole the jewels."},{"w":"children","type":"emoji","emoji":"👦👧"},{"w":"mice","type":"emoji","emoji":"🐭🐭"},{"w":"feet","type":"emoji","emoji":"🦶🦶"},{"w":"teeth","type":"emoji","emoji":"🦷🦷"},{"w":"men","type":"emoji","emoji":"👨👨"},{"w":"women","type":"emoji","emoji":"👩👩"},{"w":"sheep","type":"emoji","emoji":"🐑🐑"},{"w":"photos","type":"emoji","emoji":"📷📷"},{"w":"piano","type":"emoji","emoji":"🎹"},{"w":"YouTube videos","type":"sentence","sentence":"She watched YootYoob videos after school.","speak":"She watched YouTube videos after school."},{"w":"kangaroos","type":"emoji","emoji":"🦘🦘"},{"w":"tomatoes","type":"emoji","emoji":"🍅🍅"}],[{"w":"potatoes","type":"emoji","emoji":"🥔🥔"},{"w":"everyone","type":"sentence","sentence":"Evrywon cheered when the team won.","speak":"Everyone cheered when the team won."},{"w":"park","type":"emoji","emoji":"🏞️"},{"w":"competition","type":"sentence","sentence":"She entered the spelling competishun.","speak":"She entered the spelling competition."},{"w":"fried rice","type":"emoji","emoji":"🍚"},{"w":"chicken wings","type":"emoji","emoji":"🍗"},{"w":"cookies","type":"emoji","emoji":"🍪"},{"w":"bread","type":"emoji","emoji":"🍞"},{"w":"supermarket","type":"emoji","emoji":"🛒"},{"w":"police station","type":"emoji","emoji":"🚓"},{"w":"General Office","type":"sentence","sentence":"I went to collect my pass from the Jenerul Office.","speak":"I went to collect my pass from the General Office."},{"w":"lost-and-found corner","type":"sentence","sentence":"I found my water bottle at the lost-and-found korner.","speak":"I found my water bottle at the lost-and-found corner."},{"w":"principal","type":"sentence","sentence":"The prinsipal gave a speech at assembly.","speak":"The principal gave a speech at assembly."},{"w":"prefect","type":"sentence","sentence":"My sister is a prefekt this year.","speak":"My sister is a prefect this year."},{"w":"recess","type":"sentence","sentence":"We play games during reses.","speak":"We play games during recess."}],[{"w":"bicycle","type":"emoji","emoji":"🚲"},{"w":"ice cream","type":"emoji","emoji":"🍦"}]]},{"name":"Verb Volcano","icon":"🌋","color":"#B25B3E","blurb":"Action words — what characters do, feel and make happen.","days":[[{"w":"running","type":"sentence","sentence":"He is runing to catch the bus.","speak":"He is running to catch the bus."},{"w":"swimming","type":"sentence","sentence":"We are swiming in the pool.","speak":"We are swimming in the pool."},{"w":"hopping","type":"sentence","sentence":"The rabbit is hoping across the field.","speak":"The rabbit is hopping across the field."},{"w":"planning","type":"sentence","sentence":"We are planing a fun trip.","speak":"We are planning a fun trip."},{"w":"stopping","type":"sentence","sentence":"The car is stoping at the light.","speak":"The car is stopping at the light."},{"w":"shopping","type":"sentence","sentence":"My mum is shoping for groceries.","speak":"My mum is shopping for groceries."},{"w":"sitting","type":"sentence","sentence":"The cat is siting on the mat.","speak":"The cat is sitting on the mat."},{"w":"getting","type":"sentence","sentence":"I am geting ready for school.","speak":"I am getting ready for school."},{"w":"forgetting","type":"sentence","sentence":"I keep forgeting my homework.","speak":"I keep forgetting my homework."},{"w":"beginning","type":"sentence","sentence":"This is the begining of the story.","speak":"This is the beginning of the story."},{"w":"winning","type":"sentence","sentence":"Our team is wining the match.","speak":"Our team is winning the match."},{"w":"cutting","type":"sentence","sentence":"She is cuting the paper carefully.","speak":"She is cutting the paper carefully."},{"w":"digging","type":"sentence","sentence":"The dog is diging a hole.","speak":"The dog is digging a hole."},{"w":"jogging","type":"sentence","sentence":"He goes joging every morning.","speak":"He goes jogging every morning."},{"w":"hitting","type":"sentence","sentence":"He kept hiting the ball.","speak":"He kept hitting the ball."}],[{"w":"struggling","type":"sentence","sentence":"He was strugguling to open the jar.","speak":"He was struggling to open the jar."},{"w":"dropped","type":"sentence","sentence":"I droped my pencil on the floor.","speak":"I dropped my pencil on the floor."},{"w":"clapped","type":"sentence","sentence":"The crowd claped loudly.","speak":"The crowd clapped loudly."},{"w":"chopped","type":"sentence","sentence":"Mum choped the vegetables.","speak":"Mum chopped the vegetables."},{"w":"gripped","type":"sentence","sentence":"He griped the rope tightly.","speak":"He gripped the rope tightly."},{"w":"skipped","type":"sentence","sentence":"She skiped happily down the road.","speak":"She skipped happily down the road."},{"w":"tapped","type":"sentence","sentence":"He taped his foot to the music.","speak":"He tapped his foot to the music."},{"w":"trapped","type":"sentence","sentence":"The mouse got traped in the box.","speak":"The mouse got trapped in the box."},{"w":"slapped","type":"sentence","sentence":"The wave slaped against the boat.","speak":"The wave slapped against the boat."},{"w":"shrugging","type":"sentence","sentence":"He kept shruging his shoulders.","speak":"He kept shrugging his shoulders."},{"w":"humming","type":"sentence","sentence":"She was huming a happy tune.","speak":"She was humming a happy tune."},{"w":"jamming","type":"sentence","sentence":"The printer keeps jaming.","speak":"The printer keeps jamming."},{"w":"slamming","type":"sentence","sentence":"Stop slaming the door!","speak":"Stop slamming the door!"},{"w":"spinning","type":"sentence","sentence":"The top kept spining and spining.","speak":"The top kept spinning and spinning."},{"w":"grabbing","type":"sentence","sentence":"He was grabing all the toys.","speak":"He was grabbing all the toys."}],[{"w":"nodding","type":"sentence","sentence":"She kept noding her head.","speak":"She kept nodding her head."},{"w":"wagging","type":"sentence","sentence":"The dog's tail was waging happily.","speak":"The dog's tail was wagging happily."},{"w":"went","type":"sentence","sentence":"I want to school yesterday.","speak":"I went to school yesterday."},{"w":"came","type":"sentence","sentence":"She kaym to my party.","speak":"She came to my party."},{"w":"drank","type":"sentence","sentence":"He dranked all his juice.","speak":"He drank all his juice."},{"w":"thought","type":"sentence","sentence":"I thawt it was going to rain.","speak":"I thought it was going to rain."},{"w":"caught","type":"sentence","sentence":"She kawt the ball.","speak":"She caught the ball."},{"w":"taught","type":"sentence","sentence":"Our teacher tawt us how to read.","speak":"Our teacher taught us how to read."},{"w":"bought","type":"sentence","sentence":"I bawt a new bag yesterday.","speak":"I bought a new bag yesterday."},{"w":"brought","type":"sentence","sentence":"He brawt his lunch to school.","speak":"He brought his lunch to school."},{"w":"chose","type":"sentence","sentence":"She chohz the red dress.","speak":"She chose the red dress."},{"w":"disagree","type":"sentence","sentence":"I dizzagree with that idea.","speak":"I disagree with that idea."},{"w":"disappear","type":"sentence","sentence":"The rabbit seemed to dissapear.","speak":"The rabbit seemed to disappear."},{"w":"dislike","type":"sentence","sentence":"I dislyke eating vegetables.","speak":"I dislike eating vegetables."},{"w":"disobey","type":"sentence","sentence":"Do not disobay your teacher.","speak":"Do not disobey your teacher."}],[{"w":"discover","type":"sentence","sentence":"Scientists hope to discuver a cure.","speak":"Scientists hope to discover a cure."},{"w":"rewrite","type":"sentence","sentence":"I need to rewright my essay.","speak":"I need to rewrite my essay."},{"w":"refill","type":"sentence","sentence":"Can you rifill my water bottle?","speak":"Can you refill my water bottle?"},{"w":"return","type":"sentence","sentence":"Please retern the book to the library.","speak":"Please return the book to the library."},{"w":"reuse","type":"sentence","sentence":"We should reuze old bottles.","speak":"We should reuse old bottles."},{"w":"misplace","type":"sentence","sentence":"I always misplayce my keys.","speak":"I always misplace my keys."},{"w":"mistake","type":"sentence","sentence":"I made a big mistayk.","speak":"I made a big mistake."},{"w":"misread","type":"sentence","sentence":"He misreed the question.","speak":"He misread the question."},{"w":"misuse","type":"sentence","sentence":"Do not misyooz the equipment.","speak":"Do not misuse the equipment."},{"w":"misbehave","type":"sentence","sentence":"The children began to misbehayve.","speak":"The children began to misbehave."},{"w":"started","type":"sentence","sentence":"She startid the race early.","speak":"She started the race early."},{"w":"unlock","type":"sentence","sentence":"Use this key to unlokk the door.","speak":"Use this key to unlock the door."},{"w":"unpack","type":"sentence","sentence":"Please unpakk your bag.","speak":"Please unpack your bag."},{"w":"write","type":"sentence","sentence":"I will right a story.","speak":"I will write a story."},{"w":"hear","type":"sentence","sentence":"I can here the birds singing.","speak":"I can hear the birds singing."}],[{"w":"know","type":"sentence","sentence":"I do not no the answer.","speak":"I do not know the answer."},{"w":"meet","type":"sentence","sentence":"Let's meat at the park.","speak":"Let's meet at the park."},{"w":"remembered","type":"sentence","sentence":"She rimembered his birthday this year.","speak":"She remembered his birthday this year."},{"w":"break","type":"sentence","sentence":"Let's take a brake now.","speak":"Let's take a break now."},{"w":"wear","type":"sentence","sentence":"What should I where today?","speak":"What should I wear today?"},{"w":"listen","type":"sentence","sentence":"Please lissen to the teacher.","speak":"Please listen to the teacher."},{"w":"climb","type":"sentence","sentence":"We will clime the big tree.","speak":"We will climb the big tree."},{"w":"knock","type":"sentence","sentence":"I heard a nok on the door.","speak":"I heard a knock on the door."},{"w":"wrap","type":"sentence","sentence":"Please rap the present nicely.","speak":"Please wrap the present nicely."},{"w":"walk","type":"emoji","emoji":"🚶"},{"w":"talk","type":"emoji","emoji":"🗣️"},{"w":"believe","type":"sentence","sentence":"I don't beleive that story.","speak":"I don't believe that story."},{"w":"achieve","type":"sentence","sentence":"She worked hard to acheive her goal.","speak":"She worked hard to achieve her goal."},{"w":"receive","type":"sentence","sentence":"I will recieve my results tomorrow.","speak":"I will receive my results tomorrow."},{"w":"remember","type":"sentence","sentence":"Please rimember your homework.","speak":"Please remember your homework."}],[{"w":"followed","type":"sentence","sentence":"She folowd the path through the forest.","speak":"She followed the path through the forest."},{"w":"realised","type":"sentence","sentence":"He suddenly rielised his mistake.","speak":"He suddenly realised his mistake."},{"w":"participate","type":"sentence","sentence":"All students must partisipate in sports day.","speak":"All students must participate in sports day."},{"w":"slept","type":"sentence","sentence":"He sleppt early last night.","speak":"He slept early last night."},{"w":"waited","type":"sentence","sentence":"She waitid outside the classroom.","speak":"She waited outside the classroom."},{"w":"finished","type":"sentence","sentence":"He finisht his homework quickly.","speak":"He finished his homework quickly."},{"w":"rushed","type":"sentence","sentence":"They rusht to catch the bus.","speak":"They rushed to catch the bus."},{"w":"shoved","type":"sentence","sentence":"He accidentally shuvd his friend.","speak":"He accidentally shoved his friend."},{"w":"smiled","type":"sentence","sentence":"She smyled at her classmate.","speak":"She smiled at her classmate."},{"w":"stayed","type":"sentence","sentence":"She stayd with her grandmother for the weekend.","speak":"She stayed with her grandmother for the weekend."},{"w":"cycled","type":"sentence","sentence":"He sykled to school every morning.","speak":"He cycled to school every morning."},{"w":"celebrated","type":"sentence","sentence":"We selebrated her birthday at the park.","speak":"We celebrated her birthday at the park."}]]},{"name":"Adjective Orchard","icon":"🍎","color":"#D9A73B","blurb":"Describing words — what things look, feel and seem like.","days":[[{"w":"orange","type":"color","hex":"#ED8936"},{"w":"yellow","type":"color","hex":"#ECC94B"},{"w":"green","type":"color","hex":"#38A169"},{"w":"purple","type":"color","hex":"#805AD5"},{"w":"brown","type":"color","hex":"#8B5E3C"},{"w":"black","type":"color","hex":"#1A202C"},{"w":"white","type":"color","hex":"#FFFFFF"},{"w":"pink","type":"color","hex":"#ED64A6"},{"w":"grey","type":"color","hex":"#718096"},{"w":"blue","type":"sentence","sentence":"The sky is blew today.","speak":"The sky is blue today."},{"w":"happy","type":"emoji","emoji":"😊"},{"w":"angry","type":"emoji","emoji":"😠"},{"w":"excited","type":"emoji","emoji":"🤩"},{"w":"nervous","type":"emoji","emoji":"😰"},{"w":"proud","type":"sentence","sentence":"I felt so prowd of my brother.","speak":"I felt so proud of my brother."}],[{"w":"worried","type":"emoji","emoji":"😟"},{"w":"surprised","type":"emoji","emoji":"😲"},{"w":"scared","type":"emoji","emoji":"😨"},{"w":"jealous","type":"sentence","sentence":"She felt jellus of her friend's toy.","speak":"She felt jealous of her friend's toy."},{"w":"careful","type":"sentence","sentence":"Be carefull crossing the road.","speak":"Be careful crossing the road."},{"w":"careless","type":"sentence","sentence":"He was very carless with his toys.","speak":"He was very careless with his toys."},{"w":"hopeful","type":"sentence","sentence":"She stayed hopefull about her test results.","speak":"She stayed hopeful about her test results."},{"w":"hopeless","type":"sentence","sentence":"The situation seemed hoapless.","speak":"The situation seemed hopeless."},{"w":"colourful","type":"sentence","sentence":"The garden was full of colorfull flowers.","speak":"The garden was full of colourful flowers."},{"w":"thoughtful","type":"sentence","sentence":"It was a thoughtfull gift.","speak":"It was a thoughtful gift."},{"w":"harmful","type":"sentence","sentence":"Smoking is harmfull to your health.","speak":"Smoking is harmful to your health."},{"w":"harmless","type":"sentence","sentence":"The spider was harmliss.","speak":"The spider was harmless."},{"w":"bigger","type":"sentence","sentence":"This box is biggur than that one.","speak":"This box is bigger than that one."},{"w":"thinner","type":"sentence","sentence":"The soup looks thinnur today.","speak":"The soup looks thinner today."},{"w":"sadder","type":"sentence","sentence":"She felt even saddur after the news.","speak":"She felt even sadder after the news."}],[{"w":"redder","type":"sentence","sentence":"His face grew reddur with anger.","speak":"His face grew redder with anger."},{"w":"wetter","type":"sentence","sentence":"The grass got wettur after the rain.","speak":"The grass got wetter after the rain."},{"w":"hotter","type":"sentence","sentence":"Today is hottur than yesterday.","speak":"Today is hotter than yesterday."},{"w":"fatter","type":"sentence","sentence":"The puppy is getting fattur.","speak":"The puppy is getting fatter."},{"w":"flatter","type":"sentence","sentence":"This road is flattur than the last one.","speak":"This road is flatter than the last one."},{"w":"sunny","type":"emoji","emoji":"☀️"},{"w":"rainy","type":"emoji","emoji":"🌧️"},{"w":"cloudy","type":"emoji","emoji":"☁️"},{"w":"windy","type":"emoji","emoji":"🌬️"},{"w":"stormy","type":"emoji","emoji":"⛈️"},{"w":"beautiful","type":"sentence","sentence":"The sunset was so butiful.","speak":"The sunset was so beautiful."},{"w":"favourite","type":"sentence","sentence":"Pizza is my fayvrit food.","speak":"Pizza is my favourite food."},{"w":"different","type":"sentence","sentence":"Our shoes are diffrunt colours.","speak":"Our shoes are different colours."},{"w":"important","type":"sentence","sentence":"It is impohtant to study hard.","speak":"It is important to study hard."},{"w":"necessary","type":"sentence","sentence":"A raincoat is not always nessesary.","speak":"A raincoat is not always necessary."}],[{"w":"comfortable","type":"sentence","sentence":"This bed is very comftable.","speak":"This bed is very comfortable."},{"w":"opposite","type":"sentence","sentence":"Up and down are oppuzit directions.","speak":"Up and down are opposite directions."},{"w":"brief","type":"sentence","sentence":"He gave a breif explanation.","speak":"He gave a brief explanation."},{"w":"honest","type":"sentence","sentence":"She is always onnist with her friends.","speak":"She is always honest with her friends."},{"w":"whole","type":"sentence","sentence":"I ate the hole cake.","speak":"I ate the whole cake."},{"w":"weak","type":"sentence","sentence":"I felt very week after being sick.","speak":"I felt very weak after being sick."},{"w":"bare","type":"sentence","sentence":"He walked with bear feet.","speak":"He walked with bare feet."},{"w":"unhappy","type":"sentence","sentence":"She felt very unhappi about the news.","speak":"She felt very unhappy about the news."},{"w":"unfair","type":"sentence","sentence":"That rule is unfare to everyone.","speak":"That rule is unfair to everyone."},{"w":"unkind","type":"sentence","sentence":"It was unkynd to laugh at him.","speak":"It was unkind to laugh at him."},{"w":"unsafe","type":"sentence","sentence":"That old bridge looks unsayf.","speak":"That old bridge looks unsafe."},{"w":"untidy","type":"sentence","sentence":"His room was always untydee.","speak":"His room was always untidy."},{"w":"outdoor","type":"sentence","sentence":"We enjoy outdore activities.","speak":"We enjoy outdoor activities."},{"w":"grateful","type":"sentence","sentence":"She felt so gratefull for the gift.","speak":"She felt so grateful for the gift."},{"w":"crispy","type":"sentence","sentence":"The chips were nice and krispy.","speak":"The chips were nice and crispy."}],[{"w":"delicious","type":"sentence","sentence":"The cake tasted delishus.","speak":"The cake tasted delicious."},{"w":"perfect","type":"sentence","sentence":"She scored a perfekt mark on the test.","speak":"She scored a perfect mark on the test."},{"w":"asleep","type":"sentence","sentence":"The baby was fast asleap.","speak":"The baby was fast asleep."},{"w":"hungry","type":"sentence","sentence":"The children felt hungrie after PE.","speak":"The children felt hungry after PE."},{"w":"frightened","type":"sentence","sentence":"The kitten looked fritened by the thunder.","speak":"The kitten looked frightened by the thunder."},{"w":"guilty","type":"sentence","sentence":"He looked gilty after breaking the vase.","speak":"He looked guilty after breaking the vase."},{"w":"amazing","type":"sentence","sentence":"The fireworks display was amayzing.","speak":"The fireworks display was amazing."},{"w":"warm","type":"sentence","sentence":"The soup was nice and worm.","speak":"The soup was nice and warm."}]]},{"name":"Time Tunnel","icon":"⏳","color":"#6B4F8F","blurb":"When it happened — days, moments and the phrases that carry a story forward.","days":[[{"w":"Tuesday","type":"sentence","sentence":"The test is on Chewsday.","speak":"The test is on Tuesday."},{"w":"Thursday","type":"sentence","sentence":"We visit grandma every Thurzday.","speak":"We visit grandma every Thursday."},{"w":"Friday","type":"sentence","sentence":"I can't wait for Frydae!","speak":"I can't wait for Friday!"},{"w":"Saturday","type":"sentence","sentence":"We play football on Saddurday.","speak":"We play football on Saturday."},{"w":"Wednesday","type":"sentence","sentence":"We have art class on Wensday.","speak":"We have art class on Wednesday."},{"w":"tomorrow","type":"sentence","sentence":"See you tommorow.","speak":"See you tomorrow."},{"w":"yesterday","type":"sentence","sentence":"I went to the park yesterdae.","speak":"I went to the park yesterday."},{"w":"morning","type":"sentence","sentence":"I woke up early this mawning.","speak":"I woke up early this morning."},{"w":"hour","type":"sentence","sentence":"It took an our to finish.","speak":"It took an hour to finish."},{"w":"week","type":"sentence","sentence":"See you next weak.","speak":"See you next week."},{"w":"February","type":"sentence","sentence":"My birthday is in Febuary.","speak":"My birthday is in February."},{"w":"suddenly","type":"sentence","sentence":"Suddunly, it started to rain.","speak":"Suddenly, it started to rain."},{"w":"meanwhile","type":"sentence","sentence":"Meenwhile, the dog was sleeping.","speak":"Meanwhile, the dog was sleeping."},{"w":"finally","type":"sentence","sentence":"We finulley arrived at the beach.","speak":"We finally arrived at the beach."},{"w":"afterwards","type":"sentence","sentence":"We had ice cream afterwords.","speak":"We had ice cream afterwards."}],[{"w":"early morning","type":"blank","display":"The birds sang in the ____.","speak":"The birds sang in the early morning."},{"w":"after a while","type":"blank","display":"____, the rain finally stopped.","speak":"After a while, the rain finally stopped."},{"w":"all of a sudden","type":"blank","display":"____, the lights went out.","speak":"All of a sudden, the lights went out."},{"w":"in the end","type":"blank","display":"____, everyone was happy again.","speak":"In the end, everyone was happy again."},{"w":"the next day","type":"blank","display":"____, she went back to school.","speak":"The next day, she went back to school."},{"w":"later that night","type":"blank","display":"____, they heard a strange noise.","speak":"Later that night, they heard a strange noise."},{"w":"before long","type":"blank","display":"____, the whole class was laughing.","speak":"Before long, the whole class was laughing."},{"w":"at that moment","type":"blank","display":"____, the door creaked open.","speak":"At that moment, the door creaked open."},{"w":"without warning","type":"blank","display":"____, the storm began.","speak":"Without warning, the storm began."},{"w":"just then","type":"blank","display":"____, the bell rang loudly.","speak":"Just then, the bell rang loudly."},{"w":"not long after","type":"blank","display":"____, the sun came out again.","speak":"Not long after, the sun came out again."}]]},{"name":"Connector Bridge","icon":"🌉","color":"#2B6CA3","blurb":"Joining words that link ideas and build longer, smoother sentences.","days":[[{"w":"because","type":"sentence","sentence":"I stayed home becuz I was sick.","speak":"I stayed home because I was sick."},{"w":"when","type":"blank","display":"I will call you ____ I arrive.","speak":"I will call you when I arrive."},{"w":"while","type":"blank","display":"She read a book ____ waiting for the bus.","speak":"She read a book while waiting for the bus."},{"w":"before","type":"blank","display":"Wash your hands ____ dinner.","speak":"Wash your hands before dinner."},{"w":"after","type":"blank","display":"We played ____ school.","speak":"We played after school."},{"w":"until","type":"blank","display":"We waited ____ the rain stopped.","speak":"We waited until the rain stopped."},{"w":"although","type":"blank","display":"____ it was raining, we still went outside.","speak":"Although it was raining, we still went outside."},{"w":"though","type":"blank","display":"It was a small gift, it meant a lot ____.","speak":"It was a small gift, it meant a lot though."},{"w":"since","type":"blank","display":"I have not seen him ____ Monday.","speak":"I have not seen him since Monday."},{"w":"unless","type":"blank","display":"We will go to the park ____ it rains.","speak":"We will go to the park unless it rains."},{"w":"whenever","type":"blank","display":"I feel happy ____ I see my dog.","speak":"I feel happy whenever I see my dog."},{"w":"even though","type":"blank","display":"____ it was late, she kept reading.","speak":"Even though it was late, she kept reading."},{"w":"as soon as","type":"blank","display":"Call me ____ you arrive.","speak":"Call me as soon as you arrive."},{"w":"so that","type":"blank","display":"She studied hard ____ she could pass the test.","speak":"She studied hard so that she could pass the test."},{"w":"in case","type":"blank","display":"Bring an umbrella ____ it rains.","speak":"Bring an umbrella in case it rains."}]]},{"name":"Preposition Point","icon":"🧭","color":"#3D8B8B","blurb":"Little words that show where or when something happens.","days":[[{"w":"under","type":"blank","display":"The dog is hiding ____ the bed.","speak":"The dog is hiding under the bed."},{"w":"forward","type":"blank","display":"She took a step ____ to see better.","speak":"She took a step forward to see better."},{"w":"between","type":"blank","display":"She sat ____ her two best friends.","speak":"She sat between her two best friends."},{"w":"behind","type":"blank","display":"The ball rolled ____ the sofa.","speak":"The ball rolled behind the sofa."},{"w":"beside","type":"blank","display":"He stood ____ his sister.","speak":"He stood beside his sister."},{"w":"above","type":"blank","display":"The clouds floated ____ the hills.","speak":"The clouds floated above the hills."},{"w":"below","type":"blank","display":"The fish swam ____ the boat.","speak":"The fish swam below the boat."},{"w":"through","type":"blank","display":"We walked ____ the dark forest.","speak":"We walked through the dark forest."},{"w":"across","type":"blank","display":"They swam ____ the river.","speak":"They swam across the river."},{"w":"around","type":"blank","display":"The children ran ____ the playground.","speak":"The children ran around the playground."},{"w":"along","type":"blank","display":"We walked ____ the beach.","speak":"We walked along the beach."},{"w":"near","type":"blank","display":"The shop is ____ my house.","speak":"The shop is near my house."},{"w":"inside","type":"blank","display":"The toys are ____ the cupboard.","speak":"The toys are inside the cupboard."},{"w":"outside","type":"blank","display":"The dog is playing ____ in the garden.","speak":"The dog is playing outside in the garden."},{"w":"towards","type":"blank","display":"She walked ____ the school gate.","speak":"She walked towards the school gate."}],[{"w":"against","type":"blank","display":"He leaned ____ the wall.","speak":"He leaned against the wall."},{"w":"among","type":"blank","display":"The rabbit hid ____ the tall grass.","speak":"The rabbit hid among the tall grass."},{"w":"beyond","type":"blank","display":"The castle was ____ the hills.","speak":"The castle was beyond the hills."}]]},{"name":"Adverb Avenue","icon":"🏃","color":"#D9724F","blurb":"Words that describe how, when, or why something happens.","days":[[{"w":"accidentally","type":"sentence","sentence":"He aksidentully dropped the vase.","speak":"He accidentally dropped the vase."},{"w":"reluctantly","type":"sentence","sentence":"She riluktuntly agreed to help.","speak":"She reluctantly agreed to help."},{"w":"quickly","type":"sentence","sentence":"He kwikly ran to the bus stop.","speak":"He quickly ran to the bus stop."},{"w":"immediately","type":"sentence","sentence":"Please come here imeedeeutly.","speak":"Please come here immediately."},{"w":"fortunately","type":"sentence","sentence":"Fortchunutly, no one was hurt.","speak":"Fortunately, no one was hurt."},{"w":"gracefully","type":"sentence","sentence":"The dancer moved graysfully across the stage.","speak":"The dancer moved gracefully across the stage."},{"w":"everywhere","type":"sentence","sentence":"There was water everywear.","speak":"There was water everywhere."},{"w":"almost","type":"sentence","sentence":"He olmohst finished his homework.","speak":"He almost finished his homework."}]]},{"name":"Apostrophe Archipelago","icon":"🏝️","color":"#A0447A","blurb":"Tiny islands, joined by one comma-shaped apostrophe.","days":[[{"w":"don't","type":"sentence","sentence":"I dont want to go outside.","speak":"I don't want to go outside."},{"w":"can't","type":"sentence","sentence":"I cant find my shoes.","speak":"I can't find my shoes."},{"w":"won't","type":"sentence","sentence":"She wont come to the party.","speak":"She won't come to the party."},{"w":"isn't","type":"sentence","sentence":"This isnt fair.","speak":"This isn't fair."},{"w":"aren't","type":"sentence","sentence":"They arent ready yet.","speak":"They aren't ready yet."},{"w":"wasn't","type":"sentence","sentence":"He wasnt at school today.","speak":"He wasn't at school today."},{"w":"weren't","type":"sentence","sentence":"We werent invited.","speak":"We weren't invited."},{"w":"hasn't","type":"sentence","sentence":"She hasnt finished her homework.","speak":"She hasn't finished her homework."},{"w":"didn't","type":"sentence","sentence":"I didnt finish my lunch.","speak":"I didn't finish my lunch."},{"w":"doesn't","type":"sentence","sentence":"He doesnt like broccoli.","speak":"He doesn't like broccoli."},{"w":"couldn't","type":"sentence","sentence":"I couldnt open the jar.","speak":"I couldn't open the jar."},{"w":"shouldn't","type":"sentence","sentence":"You shouldnt run near the pool.","speak":"You shouldn't run near the pool."},{"w":"wouldn't","type":"sentence","sentence":"She wouldnt share her toys.","speak":"She wouldn't share her toys."},{"w":"I'm","type":"sentence","sentence":"Im going to the shop.","speak":"I'm going to the shop."},{"w":"you're","type":"sentence","sentence":"Your going to love this movie.","speak":"You're going to love this movie."}],[{"w":"we're","type":"sentence","sentence":"Were going on a trip.","speak":"We're going on a trip."},{"w":"they're","type":"sentence","sentence":"Their playing in the garden.","speak":"They're playing in the garden."},{"w":"it's","type":"sentence","sentence":"Its raining outside.","speak":"It's raining outside."},{"w":"that's","type":"sentence","sentence":"Thats my favourite book.","speak":"That's my favourite book."},{"w":"let's","type":"sentence","sentence":"Lets go to the beach.","speak":"Let's go to the beach."}]]}];
+
+/* Interleave days round-robin across categories — must match the Spelling Expedition
+   learning tool exactly, so "Day N" means the same content in both tools. */
+const DAYS = [];
+const DAY_LAND_IDX = [];
+{
+  const cursors = LANDS.map(()=>0);
+  let remaining = LANDS.reduce((n,l)=>n+l.days.length,0);
+  while(remaining > 0){
+    LANDS.forEach((land, li) => {
+      if(cursors[li] < land.days.length){
+        DAYS.push(land.days[cursors[li]]);
+        DAY_LAND_IDX.push(li);
+        cursors[li]++;
+        remaining--;
+      }
+    });
+  }
+}
+const TOTAL_DAYS = DAYS.length;
+const TOTAL_WORDS = DAYS.reduce((n,d)=>n+d.length,0);
+
+/* ---------------- SETUP UI ---------------- */
+const dayPicker = document.getElementById('dayPicker');
+for(let i=1;i<=TOTAL_DAYS;i++){
+  const opt = document.createElement('option');
+  opt.value = i;
+  const land = LANDS[DAY_LAND_IDX[i-1]];
+  opt.textContent = "Day " + i + " (" + land.name + ")";
+  dayPicker.appendChild(opt);
+}
+// If arriving from the Spelling Expedition tool (e.g. ?day=6), pre-select that day
+let arrivedFromExpedition = false;
+{
+  const params = new URLSearchParams(window.location.search);
+  const dayParam = parseInt(params.get('day'), 10);
+  if(!isNaN(dayParam) && dayParam >= 1 && dayParam <= TOTAL_DAYS){
+    dayPicker.value = dayParam;
+    arrivedFromExpedition = true;
+  }
+}
+function updateSetupInfo(){
+  const d = parseInt(dayPicker.value,10);
+  let poolSize = 0;
+  for(let i=0;i<d;i++) poolSize += DAYS[i].length;
+  const quizSize = Math.min(15, poolSize);
+  const prefix = arrivedFromExpedition ? "Nice work finishing today's words! " : "";
+  document.getElementById('setupInfo').textContent =
+    prefix + "This checkpoint draws from all " + poolSize + " words/phrases taught in Days 1–" + d +
+    ". Each run randomly selects " + quizSize + " questions (today's words are always included).";
+}
+dayPicker.addEventListener('change', updateSetupInfo);
+updateSetupInfo();
+
+const legend = document.getElementById('landLegend');
+LANDS.forEach(l => {
+  const div = document.createElement('div');
+  div.innerHTML = `<strong>${l.icon} ${l.name}</strong> — ${l.blurb}`;
+  legend.appendChild(div);
+});
+
+/* ---------------- ROSTER & SETTINGS ---------------- */
+const ROSTER_KEY = 'spellingCheckpoint_roster';
+const DEFAULT_ROSTER = ['Faris','Nailah','Vera','Cahaya','Ritz','Jaden','Kai Lin','Ilyas','Mikail','Chen Xi','Caylen'];
+const SCRIPT_URL_KEY = 'spellingCheckpoint_scriptURL';
+const CLASS_KEY = 'spellingCheckpoint_className';
+
+function loadRoster(){
+  try{
+    const raw = localStorage.getItem(ROSTER_KEY);
+    if(raw === null) return DEFAULT_ROSTER;
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_ROSTER;
+    return parsed;
+  }catch(e){ return DEFAULT_ROSTER; }
+}
+function saveRoster(list){ localStorage.setItem(ROSTER_KEY, JSON.stringify(list)); }
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3m9L6Qgkrej_tBeL9yuDYP1bQ72S6yA765Bky6EMEJ5ZmhH6GL27vhX_Z9ZrEAnxj3w/exec';
+function loadScriptUrl(){ return localStorage.getItem(SCRIPT_URL_KEY) || DEFAULT_SCRIPT_URL; }
+function saveScriptUrl(url){ localStorage.setItem(SCRIPT_URL_KEY, url); }
+function loadClassName(){ return localStorage.getItem(CLASS_KEY) || ''; }
+function saveClassName(name){ localStorage.setItem(CLASS_KEY, name); }
+
+const studentPicker = document.getElementById('studentPicker');
+function renderStudentPicker(){
+  const roster = loadRoster();
+  studentPicker.innerHTML = '';
+  if(roster.length === 0){
+    const opt = document.createElement('option');
+    opt.value = ''; opt.textContent = 'No class list yet — click ⚙️ to add names';
+    studentPicker.appendChild(opt);
+    return;
+  }
+  roster.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    studentPicker.appendChild(opt);
+  });
+}
+renderStudentPicker();
+
+document.getElementById('classInput').value = loadClassName();
+document.getElementById('classInput').addEventListener('input', (e)=> saveClassName(e.target.value));
+
+document.getElementById('openSettingsBtn').addEventListener('click', ()=>{
+  document.getElementById('rosterInput').value = loadRoster().join('\n');
+  document.getElementById('scriptUrlInput').value = loadScriptUrl();
+  showView('settingsView');
+});
+document.getElementById('closeSettingsBtn').addEventListener('click', ()=> showView('setupView'));
+document.getElementById('saveSettingsBtn').addEventListener('click', ()=>{
+  const names = document.getElementById('rosterInput').value
+    .split('\n').map(s=>s.trim()).filter(Boolean);
+  saveRoster(names);
+  saveScriptUrl(document.getElementById('scriptUrlInput').value.trim());
+  renderStudentPicker();
+  showView('setupView');
+});
+
+/* ---------------- SCORE SUBMISSION ---------------- */
+function submitResults(payload, statusElId){
+  const url = loadScriptUrl();
+  const statusEl = statusElId ? document.getElementById(statusElId) : null;
+  if(!url){
+    if(statusEl) statusEl.textContent = '';
+    return;
+  }
+  if(statusEl) statusEl.textContent = 'Saving score…';
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight to Apps Script
+    body: JSON.stringify(payload)
+  }).then(()=>{
+    if(statusEl) statusEl.textContent = '✓ Score saved to class records.';
+  }).catch(()=>{
+    if(statusEl) statusEl.textContent = 'Could not save score (check your internet connection or Apps Script URL in Settings).';
+  });
+}
+
+/* ---------------- QUIZ STATE ---------------- */
+let quizQuestions = [];
+let currentIndex = 0;
+let results = [];
+let currentTestDay = 1;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildQuiz(testDay){
+  const currentDayWords = DAYS[testDay-1].slice();
+  let priorPool = [];
+  for(let i=0;i<testDay-1;i++) priorPool = priorPool.concat(DAYS[i]);
+
+  const quizSizeCap = 15;
+  let quiz = currentDayWords.slice();
+  const remainingSlots = quizSizeCap - quiz.length;
+  if(remainingSlots > 0 && priorPool.length > 0){
+    const sampled = shuffle(priorPool).slice(0, remainingSlots);
+    quiz = quiz.concat(sampled);
+  }
+  return shuffle(quiz);
+}
+
+/* ---------------- SPEECH ---------------- */
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+/* ---------------- VIEW SWITCHING ---------------- */
+function showView(id){
+  ['setupView','settingsView','quizView','resultsView'].forEach(v=>{
+    document.getElementById(v).style.display = (v===id) ? 'block' : 'none';
+  });
+}
+
+/* ---------------- START ---------------- */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  if(!studentPicker.value){
+    document.getElementById('setupInfo').textContent = 'Please add a class list (⚙️) and choose a student first.';
+    return;
+  }
+  const testDay = parseInt(dayPicker.value,10);
+  currentTestDay = testDay;
+  quizQuestions = buildQuiz(testDay);
+  currentIndex = 0;
+  results = [];
+  showView('quizView');
+  renderQuestion();
+});
+
+document.getElementById('quitBtn').addEventListener('click', ()=>{
+  showView('setupView');
+});
+
+/* ---------------- RENDER QUESTION ---------------- */
+function renderScoreTrack(){
+  const track = document.getElementById('scoreTrack');
+  track.innerHTML = "";
+  quizQuestions.forEach((q, i)=>{
+    const dot = document.createElement('span');
+    dot.className = 'score-dot';
+    if(i < results.length){
+      dot.classList.add(results[i].correct ? 'correct' : 'wrong');
+    }
+    track.appendChild(dot);
+  });
+}
+
+function renderQuestion(){
+  const q = quizQuestions[currentIndex];
+  document.getElementById('quizProgress').textContent = "Question " + (currentIndex+1) + " of " + quizQuestions.length;
+  renderScoreTrack();
+
+  const card = document.getElementById('qCard');
+  let inner = "";
+
+  if(q.type === 'emoji'){
+    inner += `<div class="q-type-tag">Spell the picture</div>`;
+    inner += `<div class="q-emoji">${q.emoji}</div>`;
+    inner += `<button class="speak-btn" id="speakBtn" aria-label="Hear the word">🔊</button>`;
+    inner += `<div class="q-sentence-hint">Not sure from the picture alone? Press play to hear the word.</div>`;
+  } else if(q.type === 'color'){
+    inner += `<div class="q-type-tag">Spell the colour</div>`;
+    inner += `<div class="q-color-swatch" style="background:${q.hex};"></div>`;
+    inner += `<button class="speak-btn" id="speakBtn" aria-label="Hear the word">🔊</button>`;
+  } else if(q.type === 'number'){
+    inner += `<div class="q-type-tag">Spell the number</div>`;
+    inner += `<div class="q-number">${q.digit}</div>`;
+    inner += `<button class="speak-btn" id="speakBtn" aria-label="Hear the word">🔊</button>`;
+  } else if(q.type === 'blank'){
+    inner += `<div class="q-type-tag">Fill the blank</div>`;
+    inner += `<button class="speak-btn" id="speakBtn" aria-label="Read the sentence aloud">🔊</button>`;
+    inner += `<div class="q-sentence" id="sentenceText">${q.display}</div>`;
+    inner += `<div class="q-sentence-hint">Listen to the sentence, then spell the missing word (or phrase).</div>`;
+  } else {
+    inner += `<div class="q-type-tag">Fix the sentence</div>`;
+    inner += `<button class="speak-btn" id="speakBtn" aria-label="Read the sentence aloud">🔊</button>`;
+    inner += `<div class="q-sentence" id="sentenceText">${q.sentence}</div>`;
+    inner += `<div class="q-sentence-hint">One word is spelt wrong. Type the correct spelling of that word.</div>`;
+  }
+
+  inner += `
+    <div class="answer-row">
+      <input type="text" id="answerInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type your answer">
+      <button class="submit-btn" id="submitBtn">Check</button>
+    </div>
+    <div class="feedback-banner" id="feedbackBanner"></div>
+    <button class="next-btn" id="nextBtn">Next question →</button>
+  `;
+
+  card.innerHTML = inner;
+
+  if(q.type === 'sentence'){
+    document.getElementById('speakBtn').addEventListener('click', ()=> speak(q.speak || q.sentence));
+  } else if(q.type === 'blank'){
+    document.getElementById('speakBtn').addEventListener('click', ()=> speak(q.speak));
+  } else if(q.type === 'emoji' || q.type === 'color' || q.type === 'number'){
+    document.getElementById('speakBtn').addEventListener('click', ()=> speak(q.w));
+  }
+
+  const input = document.getElementById('answerInput');
+  input.focus();
+  input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ submitAnswer(); } });
+  document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+  document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+}
+
+function submitAnswer(){
+  const q = quizQuestions[currentIndex];
+  const input = document.getElementById('answerInput');
+  const submitBtn = document.getElementById('submitBtn');
+  if(input.disabled) return;
+
+  const given = input.value.trim();
+  const clean = s => s.trim().toLowerCase();
+  const correct = clean(given) === clean(q.w);
+
+  results.push({ w: q.w, correct, given: given || "(blank)" });
+
+  const banner = document.getElementById('feedbackBanner');
+  banner.className = 'feedback-banner ' + (correct ? 'correct' : 'wrong');
+  banner.textContent = correct ? "🎉 Correct!" : "Not quite — the correct spelling is \"" + q.w + "\".";
+
+  input.disabled = true;
+  submitBtn.disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+  renderScoreTrack();
+}
+
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex >= quizQuestions.length){
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+/* ---------------- RESULTS ---------------- */
+function showResults(){
+  showView('resultsView');
+  const correctCount = results.filter(r=>r.correct).length;
+  document.getElementById('resultsScore').textContent = correctCount + " / " + results.length;
+
+  let msg = "";
+  const pct = Math.round((correctCount/results.length)*100);
+  if(pct === 100) msg = "Perfect score! 🌟";
+  else if(pct >= 80) msg = "Great work! 👏";
+  else if(pct >= 50) msg = "Good effort — a bit more practice will help.";
+  else msg = "Keep practising — try the checkpoint again soon.";
+  document.getElementById('resultsSub').textContent = msg;
+
+  const list = document.getElementById('resultsList');
+  list.innerHTML = "";
+  results.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'results-item ' + (r.correct ? 'correct' : 'wrong');
+    row.innerHTML = `<span class="r-word">${r.w}</span><span>${r.correct ? '✓ correct' : 'you wrote: ' + r.given}</span>`;
+    list.appendChild(row);
+  });
+
+  const landName = LANDS[DAY_LAND_IDX[currentTestDay-1]].name;
+  submitResults({
+    studentName: studentPicker.value,
+    className: document.getElementById('classInput').value.trim(),
+    testDay: currentTestDay,
+    landName: landName,
+    score: correctCount,
+    total: results.length,
+    details: results
+  }, 'resultsSubmitStatus');
+}
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  const testDay = parseInt(dayPicker.value,10);
+  currentTestDay = testDay;
+  quizQuestions = buildQuiz(testDay);
+  currentIndex = 0;
+  results = [];
+  showView('quizView');
+  renderQuestion();
+});
+document.getElementById('changeeDayBtn').addEventListener('click', ()=>{
+  showView('setupView');
+});
+</script>
+</body>
+</html>
